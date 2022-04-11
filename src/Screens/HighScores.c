@@ -21,6 +21,8 @@ static void AddNewScore(unsigned long newScore);
 static void EnterPlayerName(unsigned long newScore);
 static void MoveCursor(ObjNode *theNode);
 static bool TypeNewKey(void);
+static bool StillTypingName(void);
+static bool NameIsBlank(void);
 static void UpdateNameAndCursor(Boolean doCursor, float x, float y, float z);
 static void SaveHighScores(void);
 static void LoadHighScores(void);
@@ -51,6 +53,7 @@ typedef struct
 
 HighScoreType	gNewName;	
 ObjNode	*gNewNameObj[MAX_NAME_LENGTH];
+bool gNameIsBlank = true;
 
 Byte	gCursorPosition;
 ObjNode	*gCursorObj,*gSpiralObj;
@@ -384,6 +387,7 @@ short		i;
 		if (TypeNewKey())
 		{
 			UpdateNameAndCursor(true,LEFT_EDGE,0,0);
+			gNameIsBlank = NameIsBlank();
 		}
 
 				/* MOVE CAMERA */
@@ -395,11 +399,38 @@ short		i;
 				/* DRAW SCENE */
 				
 		QD3D_DrawScene(gGameViewInfoPtr,DrawObjects);	
-	} while (!GetSDLKeyState(SDL_SCANCODE_RETURN) && !GetSDLKeyState(SDL_SCANCODE_KP_ENTER));
+	} while (StillTypingName());
+
 
 			/* CLEANUP */
 
 	DeleteAllObjects();
+}
+
+static bool StillTypingName(void)
+{
+	return
+		(!GetSDLKeyState(SDL_SCANCODE_RETURN) && !GetSDLKeyState(SDL_SCANCODE_KP_ENTER))
+		|| gNameIsBlank;
+}
+
+// The name field is empty if the cursor is at position 0 (you haven't typed
+// anything yet), or if the name consists entirely of spaces.
+static bool NameIsBlank(void)
+{
+	int i;
+
+	if (gCursorPosition == 0) {
+		return true;
+	}
+
+	for (i = 0; i < MAX_NAME_LENGTH; i++) {
+		if (gNewName.name[i] != ' ') {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
