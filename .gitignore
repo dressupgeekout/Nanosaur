@@ -17,6 +17,7 @@ src/Headers/version.h
 .vs/
 /.vscode
 /.idea
+*.swp
 
 # macOS metadata
 .DS_Store
